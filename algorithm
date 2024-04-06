@@ -1,4 +1,4 @@
-package 贪心1;
+package GreedyAlgorithm1;
 import java.util.Scanner;
 public class test {
 	static int p,m,c;//p为患者数，m为机器数，c为检查项目数
