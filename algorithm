@@ -1,0 +1,195 @@
+package 贪心1;
+import java.util.Scanner;
+public class test {
+	static int p,m,c;//p为患者数，m为机器数，c为检查项目数
+	static maching ma[];
+	static patient pa[];
+	public static int match(int x,int y)//先后级加上即可
+	{
+		for(int i=0;i<c;i++)
+			if(ma[x].c_num[i]==1&&pa[y].check_num[i]==1)
+			{
+				return i;//返回要检查的
+			}
+		return -1;
+	}
+	public static void check(int t)//t是现在的时间
+	{
+		int ch=1;//是否还需继续检索
+		while(ch==1)
+		{
+			ch=0;
+			for(int i=0;i<m;i++)
+			{
+				if(ma[i].work==(-1))//寻找未工作的机器
+				{
+					int w=-1;
+					for(int j=0;j<p;j++)
+					{
+						if(match(i,j)>=0)//匹配j号患者和i号机器，并寻找最优
+						{
+							if(t>pa[j].check&&w==-1)//暂时没匹配到的话就找一个符合检查条件的立刻匹配
+								w=j;
+							else//根据等待时间匹配，优先级匹配
+								if((t>pa[j].check&&pa[w].comming_time>pa[j].comming_time)||(t>pa[j].check&&pa[j].kf==1&&pa[w].kf==0))//空腹以考虑
+									w=j;
+						}
+					}
+					if(w!=-1)//寻找到匹配项
+					{
+						int mat=match(i,w);//检查的编号
+						if(mat>=0)
+						{
+							ma[i].work=t+ma[i].time[mat]-1;//工作到几点：现在时间点+机器计划的运行时间
+							pa[w].check=pa[w].check+ma[i].time[mat];//患者下一个检查的时间点：上一个检查开始时间+进行时间
+							pa[w].check_num[mat]=0;//标记为检查完毕
+							ch=1;//重置ch的值
+							System.out.println(t+":机器"+i+"病人"+w+"检查"+mat);//提醒病人检查
+							int e=1;
+							for(int j=0;j<c;j++)//检查是否全部检查完
+							{
+								if(pa[w].check_num[j]==1)
+								{
+									e=0;
+								}
+							}
+							if(e==1)//检查完毕
+							{
+								System.out.println("病人"+w+"在等待"+(t-pa[w].comming_time+ma[i].time[mat]-1)+"检查完毕");
+							}
+						}
+					}
+				}
+				if(ma[i].work==t)
+				{
+					//System.out.println(t+":机器"+i+"工作结束");
+					ma[i].work=-1;
+				}
+			}
+		}
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		p=11;m=5;c=5;
+		Scanner s=new Scanner(System.in);
+		pa=new patient[p];
+		ma=new maching[m];
+		System.out.println("patient:");
+		for(int i=0;i<p;i++)//读入病人信息
+		{
+		pa[i]=new patient();
+		pa[i].gname(s.nextInt());//名字
+		pa[i].check_num=new int[c];//病人需要检查的项目数
+		for(int j=0;j<c;j++)
+		{
+			pa[i].check_num[j]=0;
+		}
+		int k=s.nextInt();//要检查的数目
+		for(int j=0;j<k;j++)
+		{
+			int l=s.nextInt();
+			pa[i].check_num[l]=1;//为要检查的项目标记
+		}
+		pa[i].comming_time=s.nextInt();//来的时间
+		pa[i].check=pa[i].comming_time;//上次检查的时间
+		pa[i].kf=0;//是否空腹，考虑空腹是需要改变
+		}
+		System.out.println("maching:");
+		for(int i=0;i<m;i++)
+		{
+		ma[i]=new maching();
+		ma[i].name=s.nextInt();//机器名字
+		ma[i].c_num=new int[c];//机器检查序列
+		ma[i].time=new int[c];//机器检查耗时
+		for(int j=0;j<c;j++)
+		{
+			ma[i].time[j]=0;
+			ma[i].c_num[j]=0;
+		}
+		int k=s.nextInt();
+		for(int j=0;j<k;j++)
+		{
+			int l=s.nextInt();
+			ma[i].c_num[l]=1;//标记可检查的项目
+			ma[i].time[l]=s.nextInt();//机器检查所需时间
+		}
+		ma[i].work=-1;//开工与否
+		}
+		pa[0].check_num[1]=0;
+		int t=0;//时间模拟
+		while(t<3000)
+		{
+			check(t);
+			t++;
+		}
+	}
+
+}
+class patient
+{
+	public int name;
+	public int check_num[];
+	public int comming_time;
+	public int check;
+	public int kf;
+	public int getname()
+	{
+		return name;
+	}
+	public int getcheck()
+	{
+		return check;
+	}
+	public int getcomming()
+	{
+		return comming_time;
+	}
+	public int getcheck_num(int i)
+	{
+		return check_num[i];
+	}
+	public void gname(int i)
+	{
+		name=i;
+	}
+	public void gcheck(int i)
+	{
+		check=i;
+	}
+	public void getcomming(int i)
+	{
+		comming_time=i;
+	}
+	public void gcheck_num(int j,int i)
+	{
+		check_num[i]=j;
+	}
+}
+class maching
+{
+	public int name;
+	public int time[];
+	public int c_num[];
+	public int num;
+	public int work;
+	public int getname()
+	{return name;}
+	public int gettime(int i)
+	{return time[i];}
+	public int getc_num(int i)
+	{return c_num[i];}
+	public int getnum()
+	{return num;}
+	public int getwork()
+	{return work;}
+	public void gname(int i)
+	{name=i;}
+	public void gtime(int j,int i)
+	{time[i]=j;}
+	public void gc_num(int j,int i)
+	{c_num[i]=j;}
+	public void gnum(int i)
+	{num=i;}
+	public void gwork(int i)
+	{work=i;}
+}
